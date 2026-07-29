@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: 'Noto Sans SC', system-ui, -apple-system, sans-serif;
+    background-color: #090d16;
+    color: #f1f5f9;
+  }
+}
+
+/* Custom Financial Aesthetics */
+.stock-red {
+  color: #ef4444;
+}
+
+.stock-green {
+  color: #22c55e;
+}
+
+.bg-stock-red {
+  background-color: #ef4444;
+}
+
+.bg-stock-green {
+  background-color: #16a34a;
+}
+
+/* Vibrations & Animations */
+@keyframes vibration {
+  0% { transform: translate(0, 0); }
+  20% { transform: translate(-4px, 4px); }
+  40% { transform: translate(4px, -4px); }
+  60% { transform: translate(-3px, 2px); }
+  80% { transform: translate(3px, -2px); }
+  100% { transform: translate(0, 0); }
+}
+
+.animate-vibrate {
+  animation: vibration 0.25s ease-in-out infinite;
+}
+
+@keyframes flash-red {
+  0%, 100% { background-color: transparent; }
+  50% { background-color: rgba(239, 68, 68, 0.25); }
+}
+
+.animate-flash-red {
+  animation: flash-red 0.5s ease-in-out infinite;
+}
+
+@keyframes flash-green {
+  0%, 100% { background-color: transparent; }
+  50% { background-color: rgba(34, 197, 94, 0.25); }
+}
+
+.animate-flash-green {
+  animation: flash-green 0.5s ease-in-out infinite;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0f172a;
+}
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 3px;
+}
