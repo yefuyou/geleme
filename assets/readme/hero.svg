@@ -1,0 +1,154 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 480" width="100%" height="auto">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#090d16" />
+      <stop offset="50%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#020617" />
+    </linearGradient>
+
+    <!-- Card Gradients -->
+    <linearGradient id="card-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b" stop-opacity="0.8" />
+      <stop offset="100%" stop-color="#0f172a" stop-opacity="0.9" />
+    </linearGradient>
+
+    <linearGradient id="red-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#dc2626" />
+      <stop offset="100%" stop-color="#ef4444" />
+    </linearGradient>
+  </defs>
+
+  <!-- Canvas Background -->
+  <rect width="1200" height="480" fill="url(#bg)" rx="24" />
+  
+  <!-- Subtle Grid Pattern Background -->
+  <g opacity="0.05" stroke="#94a3b8" stroke-width="1">
+    <path d="M0 60 H1200 M0 120 H1200 M0 180 H1200 M0 240 H1200 M0 300 H1200 M0 360 H1200 M0 420 H1200" />
+    <path d="M150 0 V480 M300 0 V480 M450 0 V480 M600 0 V480 M750 0 V480 M900 0 V480 M1050 0 V480" />
+  </g>
+
+  <!-- Glowing Accent Orbs -->
+  <circle cx="150" cy="100" r="140" fill="#ef4444" opacity="0.12" />
+  <circle cx="1050" cy="380" r="160" fill="#22c55e" opacity="0.1" />
+
+  <!-- Outer Border Frame -->
+  <rect x="12" y="12" width="1176" height="456" fill="none" stroke="#334155" stroke-width="1.5" stroke-dasharray="8 8" rx="16" opacity="0.6" />
+
+  <!-- LEFT COLUMN: Brand Title & Story -->
+  <g transform="translate(60, 60)">
+    <!-- Top Pill Tag -->
+    <rect x="0" y="0" width="220" height="32" rx="16" fill="#450a0a" stroke="#991b1b" stroke-width="1" />
+    <text x="16" y="20" font-family="-apple-system, BlinkMacSystemFont, 'Noto Sans SC', sans-serif" font-size="12" font-weight="700" fill="#fca5a5">
+      🔥 散户戒戒戒诊所 v3.0
+    </text>
+
+    <!-- Main Title -->
+    <text x="0" y="95" font-family="-apple-system, BlinkMacSystemFont, 'Noto Sans SC', sans-serif" font-size="54" font-weight="900" fill="#ffffff" letter-spacing="-1">
+      割了么 <tspan fill="#ef4444">GeLeMe</tspan>
+    </text>
+
+    <!-- Subtitle -->
+    <text x="0" y="135" font-family="-apple-system, BlinkMacSystemFont, 'Noto Sans SC', sans-serif" font-size="20" font-weight="700" fill="#cbd5e1">
+      专注解决拿不住问题 · 荒诞炒股自嘲 H5
+    </text>
+
+    <!-- Tagline Description -->
+    <text x="0" y="175" font-family="-apple-system, BlinkMacSystemFont, 'Noto Sans SC', sans-serif" font-size="14" font-weight="400" fill="#94a3b8">
+      连跌三天手发抖？拿不住股票就去打工、进厂拧螺丝、耕地拿锄头！
+    </text>
+
+    <!-- Badges Row -->
+    <g transform="translate(0, 210)">
+      <!-- Badge 1: React 19 -->
+      <rect x="0" y="0" width="110" height="28" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1" />
+      <text x="12" y="18" font-family="monospace" font-size="11" font-weight="700" fill="#38bdf8">⚛️ React 19</text>
+
+      <!-- Badge 2: TypeScript -->
+      <rect x="120" y="0" width="110" height="28" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1" />
+      <text x="132" y="18" font-family="monospace" font-size="11" font-weight="700" fill="#60a5fa">📘 TypeScript</text>
+
+      <!-- Badge 3: Vite -->
+      <rect x="240" y="0" width="90" height="28" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1" />
+      <text x="252" y="18" font-family="monospace" font-size="11" font-weight="700" fill="#c084fc">⚡ Vite</text>
+
+      <!-- Badge 4: Tailwind -->
+      <rect x="340" y="0" width="120" height="28" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1" />
+      <text x="352" y="18" font-family="monospace" font-size="11" font-weight="700" fill="#2dd4bf">🎨 Tailwind v4</text>
+    </g>
+
+    <!-- Career Path Icon Cards Row -->
+    <g transform="translate(0, 270)">
+      <!-- Path 1: 割肉 -->
+      <rect x="0" y="0" width="110" height="75" rx="12" fill="url(#card-grad)" stroke="#ef4444" stroke-opacity="0.4" stroke-width="1.5" />
+      <text x="16" y="30" font-size="20">✂️</text>
+      <text x="16" y="52" font-family="-apple-system, BlinkMacSystemFont, 'Noto Sans SC', sans-serif" font-size="12" font-weight="700" fill="#f87171">1. 立即割肉</text>
+      <text x="16" y="66" font-family="monospace" font-size="9" fill="#94a3b8">流动性天使</text>
+
+      <!-- Path 2: 锄头 -->
+      <rect x="120" y="0" width="110" height="75" rx="12" fill="url(#card-grad)" stroke="#f59e0b" stroke-opacity="0.4" stroke-width="1.5" />
+      <text x="136" y="30" font-size="20">🌾</text>
+      <text x="136" y="52" font-family="-apple-system, BlinkMacSystemFont, 'Noto Sans SC', sans-serif" font-size="12" font-weight="700" fill="#fbbf24">2. 拿锄头</text>
+      <text x="136" y="66" font-family="monospace" font-size="9" fill="#94a3b8">收获两筐土豆</text>
+
+      <!-- Path 3: 拧螺丝 -->
+      <rect x="240" y="0" width="110" height="75" rx="12" fill="url(#card-grad)" stroke="#60a5fa" stroke-opacity="0.4" stroke-width="1.5" />
+      <text x="256" y="30" font-size="20">🔧</text>
+      <text x="256" y="52" font-family="-apple-system, BlinkMacSystemFont, 'Noto Sans SC', sans-serif" font-size="12" font-weight="700" fill="#93c5fd">3. 拧螺丝</text>
+      <text x="256" y="66" font-family="monospace" font-size="9" fill="#94a3b8">10s手速挑战</text>
+
+      <!-- Path 4: 送外卖 -->
+      <rect x="360" y="0" width="110" height="75" rx="12" fill="url(#card-grad)" stroke="#4ade80" stroke-opacity="0.4" stroke-width="1.5" />
+      <text x="376" y="30" font-size="20">🛵</text>
+      <text x="376" y="52" font-family="-apple-system, BlinkMacSystemFont, 'Noto Sans SC', sans-serif" font-size="12" font-weight="700" fill="#86efac">4. 送外卖</text>
+      <text x="376" y="66" font-family="monospace" font-size="9" fill="#94a3b8">爬28楼箱最稳</text>
+    </g>
+  </g>
+
+  <!-- RIGHT COLUMN: Simulated Mobile Phone Card Shell Preview -->
+  <g transform="translate(730, 40)">
+    <!-- Phone Frame Base -->
+    <rect x="0" y="0" width="410" height="400" rx="32" fill="#0b0f19" stroke="#334155" stroke-width="3" />
+    <rect x="8" y="8" width="394" height="384" rx="26" fill="#090d16" stroke="#1e293b" stroke-width="1" />
+
+    <!-- Mock Phone Status Header -->
+    <path d="M150 16 H260 A10 10 0 0 1 270 26 V30 A10 10 0 0 1 260 40 H150 A10 10 0 0 1 140 30 V26 A10 10 0 0 1 150 16 Z" fill="#020617" />
+    <text x="32" y="32" font-family="monospace" font-size="11" font-weight="700" fill="#94a3b8">09:41</text>
+    <text x="345" y="32" font-family="monospace" font-size="10" font-weight="700" fill="#ef4444">5G 📉</text>
+
+    <!-- Ticker Bar -->
+    <rect x="20" y="52" width="370" height="32" rx="8" fill="#1e293b" />
+    <text x="30" y="72" font-family="monospace" font-size="11" fill="#94a3b8">上证全割 <tspan fill="#22c55e" font-weight="700">2750.84 (-1.41%)</tspan></text>
+    <text x="230" y="72" font-family="monospace" font-size="11" fill="#94a3b8">韭菜成指 <tspan fill="#22c55e" font-weight="700">(-52.75%)</tspan></text>
+
+    <!-- Stock Drop Card Preview -->
+    <rect x="20" y="96" width="370" height="150" rx="16" fill="url(#card-grad)" stroke="#991b1b" stroke-width="1.5" />
+    <text x="40" y="125" font-family="-apple-system, BlinkMacSystemFont, 'Noto Sans SC', sans-serif" font-size="13" font-weight="700" fill="#fca5a5">
+      ⚠️ 高能警告：持仓急剧跳水
+    </text>
+    <text x="40" y="168" font-family="monospace" font-size="38" font-weight="900" fill="#22c55e">
+      -8.43% 📉
+    </text>
+    <text x="40" y="195" font-family="monospace" font-size="12" fill="#94a3b8">
+      账户残余本金: <tspan fill="#f59e0b" font-weight="700">￥47,250.00</tspan> (初始 10 万)
+    </text>
+    <rect x="40" y="210" width="180" height="24" rx="6" fill="#450a0a" />
+    <text x="50" y="226" font-family="-apple-system, BlinkMacSystemFont, 'Noto Sans SC', sans-serif" font-size="11" font-weight="700" fill="#f87171">
+      💎 你的手正在钻石化
+    </text>
+
+    <!-- Interactive Buttons Mock -->
+    <rect x="20" y="260" width="370" height="48" rx="14" fill="url(#red-grad)" />
+    <text x="205" y="290" font-family="-apple-system, BlinkMacSystemFont, 'Noto Sans SC', sans-serif" font-size="15" font-weight="800" fill="#ffffff" text-anchor="middle">
+      我拿得住！(硬咬牙撑住)
+    </text>
+
+    <rect x="20" y="318" width="370" height="44" rx="14" fill="#1e293b" stroke="#334155" stroke-width="1" />
+    <text x="205" y="345" font-family="-apple-system, BlinkMacSystemFont, 'Noto Sans SC', sans-serif" font-size="14" font-weight="700" fill="#cbd5e1" text-anchor="middle">
+      拿不住了，求指路打工 🏳️
+    </text>
+
+    <!-- Home Indicator -->
+    <rect x="150" y="378" width="110" height="4" rx="2" fill="#475569" />
+  </g>
+</svg>
