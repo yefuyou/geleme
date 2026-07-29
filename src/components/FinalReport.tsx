@@ -3,192 +3,240 @@ import { motion } from 'framer-motion';
 import html2canvas from 'html2canvas';
 import confetti from 'canvas-confetti';
 import type { UserStats } from '../types';
-import { Download, RefreshCw, Sparkles, CheckCircle2, Copy } from 'lucide-react';
+import { Award, Download, RefreshCw, Sparkles, Share2, ArrowRight } from 'lucide-react';
 
 interface FinalReportProps {
   stats: UserStats;
+  onSelectAnotherJob: () => void;
   onRestart: () => void;
 }
 
-export const FinalReport: React.FC<FinalReportProps> = ({ stats, onRestart }) => {
+export const FinalReport: React.FC<FinalReportProps> = ({ stats, onSelectAnotherJob, onRestart }) => {
   const reportRef = useRef<HTMLDivElement>(null);
   const [isSaving, setIsSaving] = useState<boolean>(false);
-  const [copied, setCopied] = useState<boolean>(false);
+  const [saveSuccessMsg, setSaveSuccessMsg] = useState<string>('');
 
   useEffect(() => {
-    // Fire confetti on report launch!
     confetti({
-      particleCount: 80,
-      spread: 70,
-      origin: { y: 0.6 }
+      particleCount: 50,
+      spread: 60,
+      origin: { y: 0.7 },
     });
   }, []);
 
-  const handleDownloadScreenshot = async () => {
+  const handleSaveImage = async () => {
     if (!reportRef.current) return;
+    setIsSaving(true);
     try {
-      setIsSaving(true);
       const canvas = await html2canvas(reportRef.current, {
         scale: 2,
         useCORS: true,
         backgroundColor: '#090d16',
-        onclone: (clonedDoc) => {
-          // Replace any unsupported CSS v4 oklch color functions with standard hex/rgb fallbacks
-          const styleTags = clonedDoc.querySelectorAll('style');
-          styleTags.forEach((tag) => {
-            if (tag.innerHTML.includes('oklch')) {
-              tag.innerHTML = tag.innerHTML.replace(/oklch\([^)]+\)/g, '#94a3b8');
-            }
-          });
-        }
       });
-      const dataUrl = canvas.toDataURL('image/png');
+      const image = canvas.toDataURL('image/png');
       const link = document.createElement('a');
-      link.href = dataUrl;
-      link.download = `割了么职业评估报告-${Date.now()}.png`;
+      link.href = image;
+      link.download = `割了么_再就业评估报告_${Date.now()}.png`;
       link.click();
+      setSaveSuccessMsg('✅ 已成功保存报告截图！');
+      setTimeout(() => setSaveSuccessMsg(''), 3000);
     } catch (err) {
-      console.error('Save screenshot error:', err);
-      alert('截图保存失败，您可以直接使用手机自带截图功能哦！');
+      console.error(err);
     } finally {
       setIsSaving(false);
     }
   };
 
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(window.location.href);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  // Commentary (判词) per job / scenario
+  const getCommentary = (): string => {
+    if (stats.isAllStar) {
+      return '你已经证明，无论在哪个行业，都能稳定地把工资送回股市。';
+    }
+
+    switch (stats.jobChosen) {
+      case 'SCREW':
+        return `你能在十秒内拧紧 ${stats.screwHits} 颗螺丝，却无法锁住自己抄底的手。`;
+      case 'DELIVERY':
+        return '你追上了所有订单，却依然没有追上涨停板。';
+      case 'HOE':
+        return '你握得住地里的锄头，却握不住盘里的红柱。';
+      case 'CUT_LOSS':
+        return '你精准为主力提供了流动性，也为韭菜社区奉献了笑料。';
+      default:
+        return '只要你不卖，主力就休想割到你分毫（因为本金没了）。';
+    }
+  };
+
+  const getJobName = (): string => {
+    if (stats.isAllStar) return '全能打工人';
+    switch (stats.jobChosen) {
+      case 'SCREW': return '流水线螺丝工';
+      case 'DELIVERY': return '同城配送员';
+      case 'HOE': return '耕地农业员';
+      case 'CUT_LOSS': return '流动性提供者';
+      default: return '钻石手受害者';
+    }
+  };
+
+  const getShareText = (): string => {
+    return `我刚才在「割了么」完成了【${getJobName()}】挑战，获得称号【${stats.primaryTitle}】，劳动所得 ${stats.earnedIncome.toLocaleString('zh-CN')} 元秒被抄底扣光！敢不敢来试试？`;
+  };
+
+  const handleCopyShare = () => {
+    navigator.clipboard.writeText(getShareText());
+    setSaveSuccessMsg('📋 群聊文案已复制，快去发群聊吧！');
+    setTimeout(() => setSaveSuccessMsg(''), 3000);
   };
 
   return (
     <motion.div 
-      initial={{ opacity: 0, y: 15 }}
+      initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="flex-1 flex flex-col justify-between p-4"
+      className="flex-1 flex flex-col justify-between p-4 text-center"
     >
-      {/* CAPTURABLE REPORT CARD */}
+      {/* Printable Report Card */}
       <div 
         ref={reportRef}
-        className="bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 border-2 border-red-500/40 rounded-2xl p-5 shadow-2xl relative overflow-hidden"
+        className="bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 border-2 border-amber-500/40 rounded-2xl p-5 shadow-2xl relative overflow-hidden text-left"
       >
-        {/* Decorative Badge */}
-        <div className="flex justify-between items-start mb-3 border-b border-slate-800 pb-3">
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 rounded-lg bg-red-600 flex items-center justify-center text-white font-bold">
-              割
-            </div>
-            <div className="text-left">
-              <h2 className="text-base font-black text-white leading-tight">割了么 · 职业评估报告</h2>
-              <span className="text-[10px] text-slate-400 font-mono">档案号: GLM-2026-CHAMPION</span>
-            </div>
-          </div>
-          <span className="text-[10px] bg-red-950/80 text-red-400 border border-red-800 px-2 py-0.5 rounded font-mono font-bold">
-            官方权威鉴定
-          </span>
-        </div>
-
-        {/* Dynamic Main Title Badge */}
-        <div className="my-3 py-3 px-4 bg-gradient-to-r from-red-950/80 to-slate-900 border border-red-800/60 rounded-xl text-center shadow-inner">
-          <div className="text-[10px] text-slate-400 mb-1 font-mono">经综合评定，您荣获尊贵称号：</div>
-          <div className="text-2xl font-black text-amber-300 tracking-tight flex items-center justify-center space-x-1.5">
-            <Sparkles className="w-5 h-5 text-amber-400" />
-            <span>{stats.primaryTitle || '钻石手受害者'}</span>
-          </div>
-        </div>
-
-        {/* Evaluation Metrics Grid */}
-        <div className="grid grid-cols-2 gap-2.5 my-3 text-left">
-          <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
-            <div className="text-[10px] text-slate-500 font-mono">股票承受能力</div>
-            <div className="text-sm font-bold text-red-400 font-mono mt-0.5">
-              {stats.diamondHandScore > 50 ? '钻石级 (死握)' : '玻璃心 (一跌就哭)'}
-            </div>
-          </div>
-          
-          <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
-            <div className="text-[10px] text-slate-500 font-mono">锄头握持能力</div>
-            <div className="text-sm font-bold text-amber-400 font-mono mt-0.5">
-              {stats.hoeSuccess ? '稳定 (获2筐土豆)' : '松塌 (建议做螺丝)'}
-            </div>
-          </div>
-
-          <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
-            <div className="text-[10px] text-slate-500 font-mono">螺丝完成率</div>
-            <div className="text-sm font-bold text-blue-400 font-mono mt-0.5">
-              {stats.screwCount >= 30 ? '100% (达标)' : `${Math.round((stats.screwCount/30)*100)}% (未达标)`}
-            </div>
-          </div>
-
-          <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
-            <div className="text-[10px] text-slate-500 font-mono">外卖准时率</div>
-            <div className="text-sm font-bold text-emerald-400 font-mono mt-0.5">
-              {stats.deliveryCompleted ? '83.3% (爬28楼)' : '未挑战'}
-            </div>
-          </div>
-        </div>
-
-        {/* Financial Loss Highlight */}
-        <div className="bg-slate-950 p-3 rounded-xl border border-red-950 text-left my-3 font-mono">
-          <div className="flex justify-between items-center">
-            <span className="text-xs text-slate-400">本轮累计亏损金额:</span>
-            <span className="text-lg font-black text-emerald-400">
-              -￥{stats.totalLoss.toLocaleString()}
+        <div className="flex justify-between items-start mb-3 pb-3 border-b border-slate-800">
+          <div>
+            <span className="text-[10px] font-mono text-amber-400 font-bold bg-amber-950/60 border border-amber-800/40 px-2.5 py-0.5 rounded-full">
+              ★ 割了么 · 官方评估 ★
             </span>
+            <h2 className="text-xl font-black text-white mt-1">
+              再就业能力评估报告
+            </h2>
           </div>
-          <div className="text-[10px] text-slate-500 mt-1">
-            (注：所有资金均为前端虚构娱乐数据，不涉及真实财产)
+          <div className="text-right font-mono text-[10px] text-slate-500">
+            <div>NO: GLM-{Math.floor(100000 + Math.random() * 900000)}</div>
+            <div>{new Date().toLocaleDateString('zh-CN')}</div>
           </div>
         </div>
 
-        {/* Report Commentary */}
-        <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl text-left">
-          <div className="text-[10px] text-slate-400 font-bold mb-1">【专家诊断评语】</div>
-          <p className="text-xs text-slate-300 leading-relaxed font-sans">
-            你虽然股票拿不住、抄底抄在半山腰，但在实业打工赛道展现出了不屈不挠的自修精神！建议继续保持良好心态，多拧螺丝少看大盘。
+        {/* Primary Badge Section */}
+        <div className="my-3 p-3.5 bg-slate-950 rounded-xl border border-amber-900/40 flex items-center space-x-3">
+          <div className="w-12 h-12 rounded-full bg-amber-500/20 border border-amber-400 flex items-center justify-center text-amber-300 shrink-0">
+            <Award className="w-7 h-7" />
+          </div>
+          <div>
+            <div className="text-[10px] text-slate-400 font-mono">本轮职业: {getJobName()}</div>
+            <div className="text-lg font-black text-amber-300 tracking-tight">
+              {stats.primaryTitle}
+            </div>
+          </div>
+        </div>
+
+        {/* Real Stats Breakdown */}
+        <div className="my-3 p-3 bg-slate-950/80 rounded-xl border border-slate-800 space-y-1.5 font-mono text-xs text-slate-300">
+          {stats.jobChosen === 'SCREW' && (
+            <>
+              <div className="flex justify-between"><span>命中螺丝:</span><span className="text-blue-400 font-bold">{stats.screwHits} 颗</span></div>
+              <div className="flex justify-between"><span>误伤老板:</span><span className="text-red-400 font-bold">{stats.screwBossHits} 次</span></div>
+              <div className="flex justify-between"><span>偷看涨停:</span><span className="text-amber-400 font-bold">{stats.screwStockPeeks} 次</span></div>
+            </>
+          )}
+
+          {stats.jobChosen === 'DELIVERY' && (
+            <>
+              <div className="flex justify-between"><span>完成订单:</span><span className="text-yellow-400 font-bold">{stats.deliveryCompletedOrders} / 6 单</span></div>
+              <div className="flex justify-between"><span>客户反悔:</span><span className="text-red-400 font-bold">{stats.deliveryRejectedCount} 次</span></div>
+              <div className="flex justify-between"><span>超时扣款:</span><span className="text-amber-400 font-bold">￥{stats.deliveryPenaltyFee}.00</span></div>
+            </>
+          )}
+
+          {stats.jobChosen === 'HOE' && (
+            <>
+              <div className="flex justify-between"><span>握持定力:</span><span className="text-amber-400 font-bold">{stats.hoeHoldDurationSeconds.toFixed(1)}s (满分3s)</span></div>
+              <div className="flex justify-between"><span>松手重试:</span><span className="text-slate-400 font-bold">{stats.hoeRetryCount} 次</span></div>
+              <div className="flex justify-between"><span>获得奖励:</span><span className="text-amber-300 font-bold">两筐热乎土豆 🥔</span></div>
+            </>
+          )}
+
+          {stats.jobChosen === 'CUT_LOSS' && (
+            <>
+              <div className="flex justify-between"><span>观望犹豫:</span><span className="text-amber-400 font-bold">{stats.cutLossWaitAttempts} 次</span></div>
+              <div className="flex justify-between"><span>割肉耗时:</span><span className="text-slate-300 font-bold">{stats.cutLossDurationSeconds} 秒</span></div>
+              <div className="flex justify-between"><span>拉升反转:</span><span className="text-red-400 font-bold">+19.98% 🚀</span></div>
+            </>
+          )}
+
+          {!stats.jobChosen && (
+            <>
+              <div className="flex justify-between"><span>持仓坚持:</span><span className="text-amber-400 font-bold">5.0 秒</span></div>
+              <div className="flex justify-between"><span>浮动跌幅:</span><span className="text-emerald-400 font-bold">-52.75%</span></div>
+            </>
+          )}
+
+          <div className="pt-2 border-t border-slate-800 flex justify-between text-slate-400">
+            <span>劳动所得收入:</span>
+            <span className="text-emerald-400 font-bold">￥{stats.earnedIncome.toLocaleString('zh-CN')}.00</span>
+          </div>
+          <div className="flex justify-between text-slate-400">
+            <span>强制抄底后余额:</span>
+            <span className="text-red-400 font-bold">￥{stats.finalBalance.toFixed(2)}</span>
+          </div>
+        </div>
+
+        {/* Dynamic Commentary (判词) */}
+        <div className="p-3 bg-amber-950/30 border border-amber-900/50 rounded-xl my-2">
+          <div className="text-[10px] text-amber-400 font-bold font-mono mb-1">【终极判词】</div>
+          <p className="text-xs text-amber-200 leading-relaxed italic">
+            “{getCommentary()}”
           </p>
         </div>
 
-        {/* Footer Stamp */}
-        <div className="mt-4 pt-3 border-t border-slate-800 flex justify-between items-center text-[10px] text-slate-500 font-mono">
-          <span>割了么评委会 · 盖章认证</span>
-          <span>纯属娱乐，不构成投资建议</span>
+        <div className="mt-3 text-center text-[10px] text-slate-500 font-mono">
+          纯属娱乐，不构成投资建议 · 割了么 App 宣
         </div>
       </div>
 
+      {saveSuccessMsg && (
+        <p className="text-xs text-emerald-400 font-mono my-1 font-bold animate-fade-in">
+          {saveSuccessMsg}
+        </p>
+      )}
+
       {/* Action Buttons */}
-      <div className="space-y-2.5 mt-4">
+      <div className="space-y-2 mt-3">
         <div className="grid grid-cols-2 gap-2">
           <motion.button
-            whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.96 }}
-            onClick={handleDownloadScreenshot}
+            onClick={handleSaveImage}
             disabled={isSaving}
-            className="py-3.5 px-4 rounded-xl bg-gradient-to-r from-red-600 to-red-700 text-white font-bold text-sm shadow-md flex items-center justify-center space-x-1.5 cursor-pointer border border-red-400/30"
+            className="py-3 px-3 rounded-xl bg-slate-800 hover:bg-slate-750 text-slate-200 font-bold text-xs border border-slate-700 flex items-center justify-center space-x-1 cursor-pointer"
           >
-            <Download className="w-4 h-4" />
-            <span>{isSaving ? '正在生成...' : '保存报告截图'}</span>
+            <Download className="w-4 h-4 text-amber-400" />
+            <span>{isSaving ? '生成中...' : '保存报告卡片'}</span>
           </motion.button>
 
           <motion.button
-            whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.96 }}
-            onClick={handleCopyLink}
-            className="py-3.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-750 text-slate-200 font-bold text-sm shadow-md flex items-center justify-center space-x-1.5 cursor-pointer border border-slate-700"
+            onClick={handleCopyShare}
+            className="py-3 px-3 rounded-xl bg-slate-800 hover:bg-slate-750 text-slate-200 font-bold text-xs border border-slate-700 flex items-center justify-center space-x-1 cursor-pointer"
           >
-            {copied ? <CheckCircle2 className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
-            <span>{copied ? '已复制链接！' : '分享给群友'}</span>
+            <Share2 className="w-4 h-4 text-emerald-400" />
+            <span>复制群聊文案</span>
           </motion.button>
         </div>
 
         <motion.button
-          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.96 }}
+          onClick={onSelectAnotherJob}
+          className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-amber-600 to-amber-700 text-white font-bold text-sm shadow-md border border-amber-400/30 flex items-center justify-center space-x-1.5 cursor-pointer"
+        >
+          <Sparkles className="w-4 h-4" />
+          <span>再换个职业 (保留成就)</span>
+          <ArrowRight className="w-4 h-4" />
+        </motion.button>
+
+        <motion.button
           whileTap={{ scale: 0.96 }}
           onClick={onRestart}
-          className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white font-black text-base shadow-lg border border-amber-400/30 flex items-center justify-center space-x-2 cursor-pointer"
+          className="w-full py-3 px-6 rounded-2xl bg-slate-900 text-slate-400 font-semibold text-xs border border-slate-800 flex items-center justify-center space-x-1 cursor-pointer"
         >
-          <RefreshCw className="w-5 h-5" />
-          <span>再割一次 (重置本金 10 万)</span>
+          <RefreshCw className="w-3.5 h-3.5" />
+          <span>重新开始 (重置所有)</span>
         </motion.button>
       </div>
     </motion.div>

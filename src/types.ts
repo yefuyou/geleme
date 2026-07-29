@@ -1,8 +1,6 @@
 export type GameStep = 
   | 'HOME'
-  | 'HOLD_1'
-  | 'HOLD_2'
-  | 'HOLD_CERT'
+  | 'HOLD_CHALLENGE'
   | 'JOB_SELECT'
   | 'JOB_CUT_LOSS'
   | 'JOB_HOE'
@@ -17,18 +15,42 @@ export interface UserStats {
   initialPrincipal: number;
   currentPrincipal: number;
   totalLoss: number;
-  holdAttempts: number;
-  diamondHandScore: number;
-  hoeSuccess: boolean;
-  hoeDuration: number;
-  screwCount: number;
-  screwSuccess: boolean;
-  deliveryCompleted: boolean;
-  deliveryEventsTriggered: number;
-  cutLossTriggered: boolean;
   jobChosen: JobType | null;
-  titles: string[];
+  completedJobs: JobType[];
+
+  // Cut Loss Stats
+  cutLossWaitAttempts: number;
+  cutLossDurationSeconds: number;
+  cutLossFirstTry: boolean;
+
+  // Hoe Stats
+  hoeHoldDurationSeconds: number;
+  hoeRetryCount: number;
+  hoeSuccess: boolean;
+
+  // Screw Stats
+  screwHits: number;
+  screwBossHits: number;
+  screwStockPeeks: number;
+  screwAccuracy: number;
+  screwSuccess: boolean;
+
+  // Delivery Stats
+  deliveryCompletedOrders: number;
+  deliveryClickCount: number;
+  deliveryRejectedCount: number;
+  deliveryPenaltyFee: number;
+  deliveryPunctualRate: number;
+  deliverySuccess: boolean;
+
+  // Settlement Stats
+  earnedIncome: number;
+  finalBalance: number;
+
+  // Titles
   primaryTitle: string;
+  titles: string[];
+  isAllStar: boolean;
 }
 
 export interface JobCardInfo {
@@ -36,7 +58,5 @@ export interface JobCardInfo {
   title: string;
   badge: string;
   description: string;
-  iconName: string;
   tagline: string;
-  difficulty: string;
 }

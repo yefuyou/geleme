@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { GameStep, UserStats, JobType } from './types';
 import { MobileShell } from './components/MobileShell';
 import { Header } from './components/Header';
@@ -13,57 +13,114 @@ import { DeliveryBranch } from './components/DeliveryBranch';
 import { SettlementScreen } from './components/SettlementScreen';
 import { FinalReport } from './components/FinalReport';
 
+const STORAGE_KEY = 'geleme_completed_jobs_v3';
+
 const INITIAL_STATS: UserStats = {
   initialPrincipal: 100000,
   currentPrincipal: 100000,
   totalLoss: 52750,
-  holdAttempts: 0,
-  diamondHandScore: 0,
-  hoeSuccess: false,
-  hoeDuration: 0,
-  screwCount: 0,
-  screwSuccess: false,
-  deliveryCompleted: false,
-  deliveryEventsTriggered: 0,
-  cutLossTriggered: false,
   jobChosen: null,
+  completedJobs: [],
+
+  cutLossWaitAttempts: 0,
+  cutLossDurationSeconds: 0,
+  cutLossFirstTry: true,
+
+  hoeHoldDurationSeconds: 0,
+  hoeRetryCount: 0,
+  hoeSuccess: false,
+
+  screwHits: 0,
+  screwBossHits: 0,
+  screwStockPeeks: 0,
+  screwAccuracy: 0,
+  screwSuccess: false,
+
+  deliveryCompletedOrders: 0,
+  deliveryClickCount: 0,
+  deliveryRejectedCount: 0,
+  deliveryPenaltyFee: 0,
+  deliveryPunctualRate: 0,
+  deliverySuccess: false,
+
+  earnedIncome: 0,
+  finalBalance: 12.8,
+
+  primaryTitle: '散户投资者',
   titles: [],
-  primaryTitle: '钻石手受害者',
+  isAllStar: false,
 };
 
 export const App: React.FC = () => {
   const [step, setStep] = useState<GameStep>('HOME');
   const [stats, setStats] = useState<UserStats>(INITIAL_STATS);
 
+  // Load completed jobs from localStorage on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved) as JobType[];
+        if (Array.isArray(parsed)) {
+          setStats((prev) => ({
+            ...prev,
+            completedJobs: parsed,
+            isAllStar: parsed.length >= 4,
+          }));
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }, []);
+
+  const saveCompletedJob = (job: JobType) => {
+    setStats((prev) => {
+      const nextJobs = prev.completedJobs.includes(job)
+        ? prev.completedJobs
+        : [...prev.completedJobs, job];
+      
+      const allStar = nextJobs.length >= 4;
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(nextJobs));
+      } catch (e) {
+        console.error(e);
+      }
+
+      return {
+        ...prev,
+        completedJobs: nextJobs,
+        isAllStar: allStar,
+        primaryTitle: allStar ? '全能打工人' : prev.primaryTitle,
+      };
+    });
+  };
+
   const addTitle = (newTitle: string) => {
     setStats((prev) => ({
       ...prev,
       primaryTitle: newTitle,
-      titles: Array.from(newSet(prev.titles, newTitle)),
+      titles: prev.titles.includes(newTitle) ? prev.titles : [...prev.titles, newTitle],
     }));
   };
 
-  const newSet = (arr: string[], val: string) => {
-    return arr.includes(val) ? arr : [...arr, val];
-  };
-
-  // Navigations
+  // Navigations & Handlers
   const handleStartHold = () => {
-    setStep('HOLD_1');
-    setStats((prev) => ({ ...prev, holdAttempts: prev.holdAttempts + 1, diamondHandScore: 80 }));
+    setStep('HOLD_CHALLENGE');
   };
 
   const handleGiveUpToJob = () => {
     setStep('JOB_SELECT');
   };
 
-  const handleHoldCertComplete = (finalPrincipal: number, diamondScore: number) => {
+  const handleHoldCertComplete = (finalPrincipal: number) => {
     setStats((prev) => ({
       ...prev,
       currentPrincipal: finalPrincipal,
-      diamondHandScore: diamondScore,
-      primaryTitle: '钻石手受害者',
+      earnedIncome: finalPrincipal,
+      finalBalance: Math.round(finalPrincipal * 0.5),
     }));
+    addTitle('钻石手受害者');
     setStep('SETTLEMENT');
   };
 
@@ -85,40 +142,103 @@ export const App: React.FC = () => {
     }
   };
 
-  const handleCutLossComplete = (title: string) => {
-    addTitle(title);
-    setStats((prev) => ({ ...prev, cutLossTriggered: true }));
-    setStep('SETTLEMENT');
-  };
-
-  const handleHoeComplete = (success: boolean, title: string) => {
-    setStats((prev) => ({ ...prev, hoeSuccess: success }));
-    if (success) addTitle(title);
-    setStep('SETTLEMENT');
-  };
-
-  const handleScrewComplete = (screwCount: number, success: boolean, title: string) => {
-    setStats((prev) => ({ ...prev, screwCount, screwSuccess: success }));
-    if (success) addTitle(title);
-    setStep('SETTLEMENT');
-  };
-
-  const handleDeliveryComplete = (title: string) => {
-    setStats((prev) => ({ ...prev, deliveryCompleted: true }));
-    addTitle(title);
-    setStep('SETTLEMENT');
-  };
-
-  const handleGoToReport = (finalLoss: number) => {
+  const handleCutLossComplete = (resStats: {
+    waitAttempts: number;
+    durationSeconds: number;
+    firstTry: boolean;
+    title: string;
+  }) => {
     setStats((prev) => ({
       ...prev,
-      totalLoss: finalLoss,
-      currentPrincipal: 12.8,
+      cutLossWaitAttempts: resStats.waitAttempts,
+      cutLossDurationSeconds: resStats.durationSeconds,
+      cutLossFirstTry: resStats.firstTry,
+    }));
+    addTitle(resStats.title);
+    if (stats.jobChosen) saveCompletedJob(stats.jobChosen);
+    setStep('SETTLEMENT');
+  };
+
+  const handleHoeComplete = (resStats: {
+    holdDurationSeconds: number;
+    retryCount: number;
+    success: boolean;
+    title: string;
+  }) => {
+    setStats((prev) => ({
+      ...prev,
+      hoeHoldDurationSeconds: resStats.holdDurationSeconds,
+      hoeRetryCount: resStats.retryCount,
+      hoeSuccess: resStats.success,
+    }));
+    addTitle(resStats.title);
+    if (stats.jobChosen) saveCompletedJob(stats.jobChosen);
+    setStep('SETTLEMENT');
+  };
+
+  const handleScrewComplete = (resStats: {
+    screwCount: number;
+    bossHits: number;
+    stockPeeks: number;
+    accuracy: number;
+    success: boolean;
+    title: string;
+  }) => {
+    setStats((prev) => ({
+      ...prev,
+      screwHits: resStats.screwCount,
+      screwBossHits: resStats.bossHits,
+      screwStockPeeks: resStats.stockPeeks,
+      screwAccuracy: resStats.accuracy,
+      screwSuccess: resStats.success,
+    }));
+    addTitle(resStats.title);
+    if (stats.jobChosen) saveCompletedJob(stats.jobChosen);
+    setStep('SETTLEMENT');
+  };
+
+  const handleDeliveryComplete = (resStats: {
+    completedOrders: number;
+    clickCount: number;
+    rejectedCount: number;
+    penaltyFee: number;
+    punctualRate: number;
+    success: boolean;
+    title: string;
+  }) => {
+    setStats((prev) => ({
+      ...prev,
+      deliveryCompletedOrders: resStats.completedOrders,
+      deliveryClickCount: resStats.clickCount,
+      deliveryRejectedCount: resStats.rejectedCount,
+      deliveryPenaltyFee: resStats.penaltyFee,
+      deliveryPunctualRate: resStats.punctualRate,
+      deliverySuccess: resStats.success,
+    }));
+    addTitle(resStats.title);
+    if (stats.jobChosen) saveCompletedJob(stats.jobChosen);
+    setStep('SETTLEMENT');
+  };
+
+  const handleGoToReport = (earnedIncome: number, finalBalance: number) => {
+    setStats((prev) => ({
+      ...prev,
+      earnedIncome,
+      finalBalance,
     }));
     setStep('REPORT');
   };
 
+  const handleSelectAnotherJob = () => {
+    setStep('JOB_SELECT');
+  };
+
   const handleRestart = () => {
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch (e) {
+      console.error(e);
+    }
     setStats(INITIAL_STATS);
     setStep('HOME');
   };
@@ -135,7 +255,7 @@ export const App: React.FC = () => {
           />
         )}
 
-        {(step === 'HOLD_1' || step === 'HOLD_2' || step === 'HOLD_CERT') && (
+        {step === 'HOLD_CHALLENGE' && (
           <HoldChallenge 
             onGiveUp={handleGiveUpToJob} 
             onCompleteCert={handleHoldCertComplete} 
@@ -144,6 +264,7 @@ export const App: React.FC = () => {
 
         {step === 'JOB_SELECT' && (
           <JobSelect 
+            completedJobs={stats.completedJobs}
             onSelectJob={handleSelectJob} 
           />
         )}
@@ -175,6 +296,10 @@ export const App: React.FC = () => {
 
         {step === 'SETTLEMENT' && (
           <SettlementScreen 
+            jobChosen={stats.jobChosen}
+            screwHits={stats.screwHits}
+            deliveryOrders={stats.deliveryCompletedOrders}
+            deliveryPenalty={stats.deliveryPenaltyFee}
             onGoToReport={handleGoToReport} 
           />
         )}
@@ -182,6 +307,7 @@ export const App: React.FC = () => {
         {step === 'REPORT' && (
           <FinalReport 
             stats={stats} 
+            onSelectAnotherJob={handleSelectAnotherJob}
             onRestart={handleRestart} 
           />
         )}
